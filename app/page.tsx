@@ -1,65 +1,153 @@
-import Image from "next/image";
+import { Plus, Search } from "lucide-react";
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { getActivities } from "@/app/actions";
 
-export default function Home() {
+// Helper para cores das Badges de Prioridade
+const getPriorityBadge = (priority: string) => {
+  switch (priority) {
+    case "CRITICA": return <Badge variant="destructive" className="bg-red-600 hover:bg-red-700">Crítica</Badge>;
+    case "ALTA": return <Badge className="bg-orange-500 hover:bg-orange-600 border-transparent text-white">Alta</Badge>;
+    case "MEDIA": return <Badge className="bg-yellow-500 hover:bg-yellow-600 border-transparent text-white">Média</Badge>;
+    case "BAIXA": return <Badge className="bg-blue-500 hover:bg-blue-600 border-transparent text-white">Baixa</Badge>;
+    default: return <Badge variant="outline">{priority}</Badge>;
+  }
+};
+
+// Helper para cores das Badges de Status
+const getStatusBadge = (status: string) => {
+  switch (status) {
+    case "CONCLUIDA": return <Badge className="bg-green-600 hover:bg-green-700 border-transparent text-white">Concluída</Badge>;
+    case "PENDENTE": return <Badge variant="secondary" className="bg-zinc-200 text-zinc-800">Pendente</Badge>;
+    case "EM_ANDAMENTO": return <Badge className="bg-sky-600 hover:bg-sky-700 border-transparent text-white">Em andamento</Badge>;
+    case "BLOQUEADA": return <Badge variant="destructive" className="bg-red-800">Bloqueada</Badge>;
+    default: return <Badge variant="outline">{status}</Badge>;
+  }
+};
+
+export default async function DashboardPage() {
+  const response = await getActivities();
+  const activities = response.success ? response.data : [];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex flex-col min-h-screen bg-zinc-50/50 p-6 md:p-10 space-y-8">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Controle de Atividades</h1>
+          <p className="text-zinc-500">Gerencie e acompanhe o progresso das demandas técnicas.</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <Button className="w-full md:w-auto gap-2 shadow-sm">
+          <Plus className="h-4 w-4" />
+          Nova Atividade
+        </Button>
+      </div>
+
+      {/* Filtros */}
+      <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4 bg-white p-4 rounded-xl border border-zinc-200 shadow-sm">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-zinc-500" />
+          <Input placeholder="Buscar por título..." className="pl-9" />
         </div>
-      </main>
+        
+        <Select>
+          <SelectTrigger>
+            <SelectValue placeholder="Prioridade" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="BAIXA">Baixa</SelectItem>
+            <SelectItem value="MEDIA">Média</SelectItem>
+            <SelectItem value="ALTA">Alta</SelectItem>
+            <SelectItem value="CRITICA">Crítica</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select>
+          <SelectTrigger>
+            <SelectValue placeholder="Categoria" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="BUG">Bug</SelectItem>
+            <SelectItem value="FEATURE">Feature</SelectItem>
+            <SelectItem value="MELHORIA">Melhoria</SelectItem>
+            <SelectItem value="SUPORTE">Suporte</SelectItem>
+            <SelectItem value="OPERACIONAL">Operacional</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Input placeholder="Time responsável..." />
+        <Input placeholder="Responsável..." />
+      </div>
+
+      {/* Tabela de Atividades */}
+      <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
+        <Table>
+          <TableHeader className="bg-zinc-50/50">
+            <TableRow>
+              <TableHead className="font-semibold text-zinc-900">Título</TableHead>
+              <TableHead className="font-semibold text-zinc-900">Categoria</TableHead>
+              <TableHead className="font-semibold text-zinc-900">Prioridade</TableHead>
+              <TableHead className="font-semibold text-zinc-900">Responsável</TableHead>
+              <TableHead className="font-semibold text-zinc-900">Status</TableHead>
+              <TableHead className="text-right font-semibold text-zinc-900">Atualizado em</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {activities && activities.length > 0 ? (
+              activities.map((activity) => (
+                <TableRow key={activity.id} className="hover:bg-zinc-50/50 transition-colors">
+                  <TableCell className="font-medium max-w-[300px] truncate">
+                    <div className="flex flex-col">
+                      <span>{activity.title}</span>
+                      <span className="text-xs text-zinc-500 font-normal truncate">{activity.description}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm text-zinc-600 font-medium">{activity.category}</span>
+                  </TableCell>
+                  <TableCell>
+                    {getPriorityBadge(activity.priority)}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium">{activity.personResponsible}</span>
+                      <span className="text-xs text-zinc-500">{activity.teamResponsible}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {getStatusBadge(activity.status)}
+                  </TableCell>
+                  <TableCell className="text-right text-zinc-500 text-sm">
+                    {new Date(activity.updatedAt).toLocaleDateString("pt-BR")}
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} className="h-32 text-center text-zinc-500">
+                  Nenhuma atividade cadastrada. Clique em &quot;Nova Atividade&quot; para começar!
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }
