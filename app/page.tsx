@@ -17,7 +17,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getActivities } from "@/app/actions";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { ActivityActions } from "@/components/activity-actions";
+import { getActivities, createActivity } from "@/app/actions";
 
 // Helper para cores das Badges de Prioridade
 const getPriorityBadge = (priority: string) => {
@@ -53,10 +63,92 @@ export default async function DashboardPage() {
           <h1 className="text-3xl font-bold tracking-tight text-zinc-900">Controle de Atividades</h1>
           <p className="text-zinc-500">Gerencie e acompanhe o progresso das demandas técnicas.</p>
         </div>
-        <Button className="w-full md:w-auto gap-2 shadow-sm">
-          <Plus className="h-4 w-4" />
-          Nova Atividade
-        </Button>
+        
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="w-full md:w-auto gap-2 shadow-sm">
+              <Plus className="h-4 w-4" />
+              Nova Atividade
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Criar Nova Atividade</DialogTitle>
+            </DialogHeader>
+            <form action={async (formData) => {
+              "use server"
+              await createActivity(formData)
+            }} className="space-y-6 pt-4">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="title">Título</Label>
+                  <Input id="title" name="title" placeholder="Ex: Ajuste no Layout" required />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="description">Descrição</Label>
+                  <Textarea 
+                    id="description" 
+                    name="description" 
+                    placeholder="Descreva detalhadamente a atividade..." 
+                    className="min-h-[100px]"
+                    required 
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="priority">Prioridade</Label>
+                    <Select name="priority" required>
+                      <SelectTrigger id="priority">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="BAIXA">Baixa</SelectItem>
+                        <SelectItem value="MEDIA">Média</SelectItem>
+                        <SelectItem value="ALTA">Alta</SelectItem>
+                        <SelectItem value="CRITICA">Crítica</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Categoria</Label>
+                    <Select name="category" required>
+                      <SelectTrigger id="category">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="BUG">Bug</SelectItem>
+                        <SelectItem value="FEATURE">Feature</SelectItem>
+                        <SelectItem value="MELHORIA">Melhoria</SelectItem>
+                        <SelectItem value="SUPORTE">Suporte</SelectItem>
+                        <SelectItem value="OPERACIONAL">Operacional</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="teamResponsible">Time Responsável</Label>
+                    <Input id="teamResponsible" name="teamResponsible" placeholder="Ex: Frontend" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="personResponsible">Responsável</Label>
+                    <Input id="personResponsible" name="personResponsible" placeholder="Nome da pessoa" required />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-4">
+                <Button type="submit" className="w-full sm:w-auto">
+                  Salvar Atividade
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Filtros */}
@@ -105,7 +197,8 @@ export default async function DashboardPage() {
               <TableHead className="font-semibold text-zinc-900">Prioridade</TableHead>
               <TableHead className="font-semibold text-zinc-900">Responsável</TableHead>
               <TableHead className="font-semibold text-zinc-900">Status</TableHead>
-              <TableHead className="text-right font-semibold text-zinc-900">Atualizado em</TableHead>
+              <TableHead className="font-semibold text-zinc-900">Atualizado em</TableHead>
+              <TableHead className="text-right font-semibold text-zinc-900 w-[80px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -133,14 +226,17 @@ export default async function DashboardPage() {
                   <TableCell>
                     {getStatusBadge(activity.status)}
                   </TableCell>
-                  <TableCell className="text-right text-zinc-500 text-sm">
+                  <TableCell className="text-zinc-500 text-sm">
                     {new Date(activity.updatedAt).toLocaleDateString("pt-BR")}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <ActivityActions activityId={activity.id} />
                   </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="h-32 text-center text-zinc-500">
+                <TableCell colSpan={7} className="h-32 text-center text-zinc-500">
                   Nenhuma atividade cadastrada. Clique em &quot;Nova Atividade&quot; para começar!
                 </TableCell>
               </TableRow>
