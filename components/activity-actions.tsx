@@ -18,22 +18,34 @@ import {
   AlertDialogTitle 
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { updateActivityStatus, deleteActivity } from "@/app/actions";
+import { updateActivity, deleteActivity } from "@/app/actions";
 import { useState } from "react";
+import { ActivityModal } from "./activity-modal";
 
 interface ActivityActionsProps {
-  activityId: string;
+  activity: any;
 }
 
-export function ActivityActions({ activityId }: ActivityActionsProps) {
+export function ActivityActions({ activity }: ActivityActionsProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   const handleComplete = async () => {
-    await updateActivityStatus(activityId, "CONCLUIDA");
+    const formData = new FormData();
+    formData.append("title", activity.title);
+    formData.append("description", activity.description);
+    formData.append("priority", activity.priority);
+    formData.append("category", activity.category);
+    formData.append("teamResponsible", activity.teamResponsible);
+    formData.append("personResponsible", activity.personResponsible);
+    formData.append("status", "CONCLUIDA");
+    
+    await updateActivity(activity.id, formData);
   };
 
   const handleDelete = async () => {
-    await deleteActivity(activityId);
+    await deleteActivity(activity.id);
     setShowDeleteDialog(false);
   };
 
@@ -47,11 +59,15 @@ export function ActivityActions({ activityId }: ActivityActionsProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem onSelect={() => setShowDetailsModal(true)} className="gap-2">
+            <Edit className="h-4 w-4 text-zinc-600" />
+            Ver Detalhes
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={handleComplete} className="gap-2">
             <CheckCircle className="h-4 w-4 text-green-600" />
             Marcar como Concluída
           </DropdownMenuItem>
-          <DropdownMenuItem className="gap-2">
+          <DropdownMenuItem onSelect={() => setShowEditModal(true)} className="gap-2">
             <Edit className="h-4 w-4 text-blue-600" />
             Editar
           </DropdownMenuItem>
@@ -64,6 +80,20 @@ export function ActivityActions({ activityId }: ActivityActionsProps) {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <ActivityModal 
+        activityToEdit={activity} 
+        isOpen={showDetailsModal} 
+        onOpenChange={setShowDetailsModal}
+        mode="details"
+      />
+
+      <ActivityModal 
+        activityToEdit={activity} 
+        isOpen={showEditModal} 
+        onOpenChange={setShowEditModal}
+        mode="edit"
+      />
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
