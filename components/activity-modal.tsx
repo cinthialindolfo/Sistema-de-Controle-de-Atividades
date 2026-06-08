@@ -14,14 +14,9 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { createActivity, updateActivity } from "@/app/actions"
+import { toast } from "sonner"
 
 interface ActivityModalProps {
   activityToEdit?: any
@@ -49,17 +44,24 @@ export function ActivityModal({
   const handleSubmit = async (formData: FormData) => {
     if (isDetails) return
 
-    let result
-    if (isEditing) {
-      result = await updateActivity(activityToEdit.id, formData)
-    } else {
-      result = await createActivity(formData)
-    }
+    const toastId = toast.loading(isEditing ? "Salvando alterações..." : "Criando atividade...")
 
-    if (result.success) {
-      onOpenChange?.(false)
-    } else {
-      alert(result.error)
+    try {
+      let result
+      if (isEditing) {
+        result = await updateActivity(activityToEdit.id, formData)
+      } else {
+        result = await createActivity(formData)
+      }
+
+      if (result.success) {
+        toast.success(isEditing ? "Atividade atualizada com sucesso!" : "Atividade criada com sucesso!", { id: toastId })
+        onOpenChange?.(false)
+      } else {
+        toast.error(result.error || "Ocorreu um erro inesperado", { id: toastId })
+      }
+    } catch (error) {
+      toast.error("Erro de conexão com o servidor", { id: toastId })
     }
   }
 

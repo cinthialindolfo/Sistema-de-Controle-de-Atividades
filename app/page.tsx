@@ -69,41 +69,43 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   return (
     <div className="flex flex-col min-h-screen bg-zinc-50/50 p-4 md:p-10 space-y-6 md:space-y-8 pb-24 md:pb-10">
       {/* Header com Branding Restaurado */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 bg-white p-4 md:p-6 rounded-2xl md:rounded-3xl border border-zinc-200 shadow-sm">
         <div className="space-y-1">
-          <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight text-zinc-900">
+          <h1 className="text-xl md:text-4xl font-extrabold tracking-tight text-zinc-900">
             Controle de Atividades
           </h1>
-          <p className="text-xs md:text-base text-zinc-500 font-medium">
+          <p className="text-[10px] md:text-base text-zinc-500 font-medium">
             Sistema de Gestão e Acompanhamento de Demandas
           </p>
         </div>
         
-        <div className="flex items-center gap-4">
-          <div className="hidden sm:flex items-center gap-3 bg-zinc-50 px-4 py-2 rounded-2xl border border-zinc-100">
-            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-              <User className="h-5 w-5" />
+        <div className="flex items-center justify-between md:justify-end gap-2 md:gap-4 w-full md:w-auto">
+          <div className="flex items-center gap-2 md:gap-3 bg-zinc-50 px-2 md:px-4 py-1.5 md:py-2 rounded-xl md:rounded-2xl border border-zinc-100 max-w-[180px] md:max-w-none">
+            <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-blue-100 flex-shrink-0 flex items-center justify-center text-blue-600">
+              <User className="h-4 w-4 md:h-5 md:w-5" />
             </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-bold text-zinc-800">{user?.firstName} {user?.lastName}</span>
-              <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-tighter">Colaborador</span>
+            <div className="flex flex-col min-w-0">
+              <span className="text-xs md:text-sm font-bold text-zinc-800 truncate">{user?.firstName} {user?.lastName}</span>
+              <span className="text-[9px] md:text-[10px] text-zinc-400 font-bold uppercase tracking-tighter">Colaborador</span>
             </div>
           </div>
 
-          <form action={logout}>
-            <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl text-zinc-500 hover:text-red-600 hover:bg-red-50 border-zinc-200 hover:border-red-100 transition-all">
-              <LogOut className="h-5 w-5" />
-            </Button>
-          </form>
-
-          {/* Botão Nova Atividade - Desktop */}
-          <div className="hidden md:block">
-            <ActivityModal>
-              <Button className="h-11 gap-2 shadow-md bg-zinc-900 hover:bg-zinc-800 transition-all px-6 rounded-xl">
-                <Plus className="h-5 w-5" />
-                Nova Atividade
+          <div className="flex items-center gap-2">
+            <form action={logout}>
+              <Button variant="outline" size="icon" className="h-9 w-9 md:h-11 md:w-11 rounded-lg md:rounded-xl text-zinc-500 hover:text-red-600 hover:bg-red-50 border-zinc-200 hover:border-red-100 transition-all">
+                <LogOut className="h-4 w-4 md:h-5 md:w-5" />
               </Button>
-            </ActivityModal>
+            </form>
+
+            {/* Botão Nova Atividade - Desktop/Tablet */}
+            <div className="hidden sm:block">
+              <ActivityModal>
+                <Button className="h-9 md:h-11 gap-2 shadow-md bg-zinc-900 hover:bg-zinc-800 transition-all px-4 md:px-6 rounded-lg md:rounded-xl text-xs md:text-sm">
+                  <Plus className="h-4 w-4 md:h-5 md:w-5" />
+                  Nova Atividade
+                </Button>
+              </ActivityModal>
+            </div>
           </div>
         </div>
       </div>

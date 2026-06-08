@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { updateActivity, deleteActivity } from "@/app/actions";
 import { useState } from "react";
 import { ActivityModal } from "./activity-modal";
+import { toast } from "sonner";
 
 interface ActivityActionsProps {
   activity: any;
@@ -32,6 +33,7 @@ export function ActivityActions({ activity }: ActivityActionsProps) {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   const handleComplete = async () => {
+    const toastId = toast.loading("Finalizando atividade...");
     const formData = new FormData();
     formData.append("title", activity.title);
     formData.append("description", activity.description);
@@ -41,12 +43,23 @@ export function ActivityActions({ activity }: ActivityActionsProps) {
     formData.append("personResponsible", activity.personResponsible);
     formData.append("status", "CONCLUIDA");
     
-    await updateActivity(activity.id, formData);
+    const result = await updateActivity(activity.id, formData);
+    if (result.success) {
+      toast.success("Atividade concluída!", { id: toastId });
+    } else {
+      toast.error("Falha ao concluir atividade.", { id: toastId });
+    }
   };
 
   const handleDelete = async () => {
-    await deleteActivity(activity.id);
-    setShowDeleteDialog(false);
+    const toastId = toast.loading("Excluindo atividade...");
+    const result = await deleteActivity(activity.id);
+    if (result.success) {
+      toast.success("Atividade excluída com sucesso!", { id: toastId });
+      setShowDeleteDialog(false);
+    } else {
+      toast.error("Falha ao excluir atividade.", { id: toastId });
+    }
   };
 
   return (
