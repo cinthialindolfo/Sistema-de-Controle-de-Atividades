@@ -4,15 +4,15 @@ import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-// Função auxiliar para pegar o DB apenas no servidor
-async function getDb() {
-  const libDb = await import('../lib/db');
-  return libDb.default;
+// Função auxiliar para pegar o DB e saber se é nuvem ou local
+async function getDbInstance() {
+  const { default: db, isCloud } = await import('../lib/db');
+  return { db, isCloud };
 }
 
 export async function getActivities(filters?: any) {
   try {
-    const db = await getDb();
+    const { db, isCloud } = await getDbInstance();
     let query = "SELECT * FROM Activity WHERE 1=1";
     const params: any[] = [];
 
@@ -43,7 +43,11 @@ export async function getActivities(filters?: any) {
 
     query += " ORDER BY createdAt DESC";
     
-    const activities = db.prepare(query).all(...params);
+    // Suporte para Turso (execute) vs better-sqlite3 (all)
+    const activities = isCloud 
+      ? (await db.execute({ sql: query, args: params })).rows
+      : db.prepare(query).all(...params);
+
     return { success: true, data: activities };
   } catch (error) {
     console.error("Erro ao buscar atividades:", error);
@@ -53,7 +57,7 @@ export async function getActivities(filters?: any) {
 
 export async function createActivity(formData: FormData) {
   try {
-    const db = await getDb();
+    const { db, isCloud } = await getDbInstance();
     const id = Math.random().toString(36).substring(2, 11);
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
@@ -63,10 +67,17 @@ export async function createActivity(formData: FormData) {
     const personResponsible = formData.get("personResponsible") as string;
     const now = new Date().toISOString();
 
-    db.prepare(`
+    const sql = `
       INSERT INTO Activity (id, title, description, priority, category, teamResponsible, personResponsible, status, createdAt, updatedAt)
       VALUES (?, ?, ?, ?, ?, ?, ?, 'PENDENTE', ?, ?)
-    `).run(id, title, description, priority, category, teamResponsible, personResponsible, now, now);
+    `;
+    const args = [id, title, description, priority, category, teamResponsible, personResponsible, now, now];
+
+    if (isCloud) {
+      await db.execute({ sql, args });
+    } else {
+      db.prepare(sql).run(...args);
+    }
 
     revalidatePath("/");
     return { success: true, data: { id } };
@@ -78,7 +89,7 @@ export async function createActivity(formData: FormData) {
 
 export async function updateActivity(id: string, formData: FormData) {
   try {
-    const db = await getDb();
+    const { db, isCloud } = await getDbInstance();
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
     const priority = formData.get("priority") as string;
@@ -88,11 +99,18 @@ export async function updateActivity(id: string, formData: FormData) {
     const status = formData.get("status") as string;
     const now = new Date().toISOString();
 
-    db.prepare(`
+    const sql = `
       UPDATE Activity 
       SET title = ?, description = ?, priority = ?, category = ?, teamResponsible = ?, personResponsible = ?, status = ?, updatedAt = ?
       WHERE id = ?
-    `).run(title, description, priority, category, teamResponsible, personResponsible, status, now, id);
+    `;
+    const args = [title, description, priority, category, teamResponsible, personResponsible, status, now, id];
+
+    if (isCloud) {
+      await db.execute({ sql, args });
+    } else {
+      db.prepare(sql).run(...args);
+    }
 
     revalidatePath("/");
     return { success: true };
@@ -104,8 +122,15 @@ export async function updateActivity(id: string, formData: FormData) {
 
 export async function deleteActivity(id: string) {
   try {
-    const db = await getDb();
-    db.prepare("DELETE FROM Activity WHERE id = ?").run(id);
+    const { db, isCloud } = await getDbInstance();
+    const sql = "DELETE FROM Activity WHERE id = ?";
+    
+    if (isCloud) {
+      await db.execute({ sql, args: [id] });
+    } else {
+      db.prepare(sql).run(id);
+    }
+
     revalidatePath("/");
     return { success: true };
   } catch (error) {
@@ -124,13 +149,29 @@ export async function login(formData: FormData) {
   }
 
   try {
-    const db = await getDb();
-    let user = db.prepare("SELECT * FROM User WHERE firstName = ? AND lastName = ?").get(firstName, lastName) as any;
+    const { db, isCloud } = await getDbInstance();
+    
+    let user;
+    const findSql = "SELECT * FROM User WHERE firstName = ? AND lastName = ?";
+    
+    if (isCloud) {
+      const result = await db.execute({ sql: findSql, args: [firstName, lastName] });
+      user = result.rows[0];
+    } else {
+      user = db.prepare(findSql).get(firstName, lastName);
+    }
 
     if (!user) {
       const id = Math.random().toString(36).substring(2, 11);
       const now = new Date().toISOString();
-      db.prepare("INSERT INTO User (id, firstName, lastName, pin, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)").run(id, firstName, lastName, pin, now, now);
+      const insertSql = "INSERT INTO User (id, firstName, lastName, pin, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)";
+      const insertArgs = [id, firstName, lastName, pin, now, now];
+      
+      if (isCloud) {
+        await db.execute({ sql: insertSql, args: insertArgs });
+      } else {
+        db.prepare(insertSql).run(...insertArgs);
+      }
       user = { id, firstName, lastName, pin };
     } else if (user.pin !== pin) {
       return { success: false, error: "PIN incorreto para este usuário." };
@@ -165,8 +206,15 @@ export async function getCurrentUser() {
 
     if (!userId) return null;
 
-    const db = await getDb();
-    return db.prepare("SELECT * FROM User WHERE id = ?").get(userId) as any;
+    const { db, isCloud } = await getDbInstance();
+    const sql = "SELECT * FROM User WHERE id = ?";
+    
+    if (isCloud) {
+      const result = await db.execute({ sql, args: [userId] });
+      return result.rows[0];
+    } else {
+      return db.prepare(sql).get(userId);
+    }
   } catch (error) {
     return null;
   }

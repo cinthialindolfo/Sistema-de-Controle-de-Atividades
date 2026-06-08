@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Plus, LogOut, User } from "lucide-react";
 import { ActivityModal } from "@/components/activity-modal";
 import { SummaryCards } from "@/components/summary-cards";
-// ... (rest of imports)
 import { 
   Table, 
   TableBody, 
@@ -15,9 +14,6 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import Link from "next/link";
-
-// ... (helpers)
 
 // Helper para cores das Badges de Prioridade
 const getPriorityBadge = (priority: string) => {
@@ -50,7 +46,6 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   const user = await getCurrentUser();
   
   const filters = {
-// ... (rest of filters)
     search: params.search as string,
     priority: params.priority as string,
     category: params.category as string,
@@ -60,11 +55,11 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   };
 
   const response = await getActivities(filters);
-  const activities = response.success ? response.data : [];
+  const activities = (response.success ? response.data : []) as any[];
 
   // Busca todas as atividades (sem filtros) para as métricas do dashboard
   const allActivitiesResponse = await getActivities();
-  const allActivities = allActivitiesResponse.success ? allActivitiesResponse.data : [];
+  const allActivities = (allActivitiesResponse.success ? allActivitiesResponse.data : []) as any[];
 
   return (
     <div className="flex flex-col min-h-screen bg-zinc-50/50 p-4 md:p-10 space-y-6 md:space-y-8 pb-24 md:pb-10">

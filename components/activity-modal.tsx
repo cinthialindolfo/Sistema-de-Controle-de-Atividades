@@ -207,7 +207,7 @@ export function ActivityModal({
               </Button>
             )}
             {isDetails && (
-              <Button type="button" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
+              <Button type="button" onClick={() => onOpenChange?.(false)} className="w-full sm:w-auto">
                 Fechar
               </Button>
             )}

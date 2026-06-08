@@ -8,7 +8,7 @@ interface Activity {
 }
 
 interface SummaryCardsProps {
-  activities: Activity[];
+  activities: any[];
 }
 
 export function SummaryCards({ activities = [] }: SummaryCardsProps) {
