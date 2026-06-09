@@ -8,9 +8,9 @@ O **Sistema de Controle de Atividades** é uma aplicação voltada para o gerenc
 ## 2. Arquitetura e Fluxo de Dados
 A aplicação utiliza o framework **Next.js** com a seguinte estrutura:
 *   **Persistência:** Banco de dados SQLite local (`dev.db`).
-*   **Acesso ao Banco:** Utilização direta da biblioteca `better-sqlite3` isolada em `lib/db.ts`.
-*   **Server Actions:** Lógica de negócio e operações de banco encapsuladas em `app/actions.ts`, utilizando importações dinâmicas para evitar vazamento de código do servidor para o cliente.
-*   **Segurança:** Sistema de login simplificado com auto-registro no primeiro acesso.
+*   **ORM e Schema:** Utilização do **Prisma v6** para modelagem de dados e migrações de banco (`npx prisma migrate dev`).
+*   **Acesso ao Banco:** Utilização da biblioteca `better-sqlite3` para máxima performance em ambiente de desenvolvimento local.
+*   **Server Actions:** Lógica de negócio encapsulada em `app/actions.ts` com validação estrita no servidor.
 
 ## 3. Requisitos do Sistema
 

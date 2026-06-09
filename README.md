@@ -17,7 +17,10 @@ npm install
 ```
 
 ### 3. Configuração do Banco de Dados
-A aplicação utiliza **SQLite** para persistência. Não é necessário configurar um servidor de banco de dados externo. O arquivo `dev.db` será criado automaticamente na raiz do projeto ao iniciar.
+A aplicação utiliza **SQLite** via **Prisma v6**. Prepare o banco de dados com:
+```bash
+npx prisma migrate dev
+```
 
 ### 4. Executando em Desenvolvimento
 Para rodar o projeto com atualização em tempo real:
