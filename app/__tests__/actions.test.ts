@@ -52,12 +52,16 @@ describe('Ações de Autenticação - Lógica Real', () => {
 
 describe('CRUD de Atividades - Lógica Real', () => {
   it('deve disparar criação de atividade', async () => {
-    const { createActivity } = await import('@/app/actions')
+    const { createActivityAction } = await import('@/app/actions')
     const formData = new FormData()
     formData.append('title', 'Teste')
     formData.append('priority', 'ALTA')
+    formData.append('description', 'Teste')
+    formData.append('category', 'BUG')
+    formData.append('teamResponsible', 'TI')
+    formData.append('personResponsible', 'Admin')
     
-    const result = await createActivity(formData)
+    const result = await createActivityAction(formData)
     expect(result.success).toBe(true)
   })
 })

@@ -49,28 +49,29 @@ O login é simplificado para uso ágil:
 *   **Ícones**: Lucide React
 *   **Notificações**: Sonner (Toast)
 
-## 🧪 Testes Automatizados
+## 🧪 Testes e Qualidade (CI/CD)
 
-O projeto conta com uma suíte de testes unitários para garantir a integridade das regras de negócio.
-
-### Como rodar os testes:
-```bash
-npm test
-```
-Os testes cobrem:
-*   **Ações de Autenticação**: Login, Logout e validação de sessão.
-*   **CRUD Completo**: Criação, atualização e exclusão de atividades.
-*   **Sistema**: Seed de dados e inicialização.
-*   **UI**: Renderização de componentes e lógica de badges.
+O projeto utiliza **GitHub Actions** para garantir a qualidade do código em cada contribuição:
+*   **Integração Contínua (CI)**: Toda vez que um código é enviado para o GitHub, os testes automatizados são executados em um ambiente Linux isolado.
+*   **Validação Automatizada**: O build e a geração do cliente Prisma são validados antes de qualquer integração na branch principal.
 
 ## 🐳 Docker
 
-Para rodar a aplicação em um container:
+O sistema é totalmente containerizado para facilitar a distribuição e o desenvolvimento consistente.
 
+### Comandos Rápidos (via docker.sh):
 ```bash
-docker build -t controle-atividades .
-docker run -p 3000:3000 controle-atividades
+# Subir ambiente de produção
+./docker.sh up
+
+# Ver logs
+./docker.sh logs
+
+# Parar tudo
+./docker.sh down
 ```
+
+A configuração Docker utiliza um **Dockerfile Multi-stage**, garantindo uma imagem final leve e segura, rodando com usuário não-root.
 
 ## 🤖 Uso de IA / Cloud Code Skill
 

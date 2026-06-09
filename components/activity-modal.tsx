@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { createActivity, updateActivity } from "@/app/actions"
+import { createActivityAction, updateActivity } from "@/app/actions"
 import { toast } from "sonner"
 
 interface ActivityModalProps {
@@ -51,7 +51,7 @@ export function ActivityModal({
       if (isEditing) {
         result = await updateActivity(activityToEdit.id, formData)
       } else {
-        result = await createActivity(formData)
+        result = await createActivityAction(formData)
       }
 
       if (result.success) {

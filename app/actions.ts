@@ -54,23 +54,36 @@ export async function getActivities(filters?: any) {
   }
 }
 
-export async function createActivity(formData: FormData) {
+export async function createActivityAction(formData: FormData) {
   try {
     const db = await getDb();
+    
+    // 1. Extração de Campos
+    const title = formData.get("title")?.toString().trim();
+    const description = formData.get("description")?.toString().trim();
+    const priority = formData.get("priority")?.toString();
+    const category = formData.get("category")?.toString();
+    const teamResponsible = formData.get("teamResponsible")?.toString().trim();
+    const personResponsible = formData.get("personResponsible")?.toString().trim();
+
+    // 2. Validação Estrita (Sênior)
+    if (!title) return { success: false, error: "O título é obrigatório." };
+    if (!description) return { success: false, error: "A descrição é obrigatória." };
+    if (!priority) return { success: false, error: "A prioridade é obrigatória." };
+    if (!category) return { success: false, error: "A categoria é obrigatória." };
+    if (!teamResponsible) return { success: false, error: "O time responsável é obrigatório." };
+    if (!personResponsible) return { success: false, error: "A pessoa responsável é obrigatória." };
+
+    // 3. Automação e Metadados
     const id = Math.random().toString(36).substring(2, 11);
-    const title = formData.get("title") as string;
-    const description = formData.get("description") as string;
-    const priority = formData.get("priority") as string;
-    const category = formData.get("category") as string;
-    const teamResponsible = formData.get("teamResponsible") as string;
-    const personResponsible = formData.get("personResponsible") as string;
+    const status = "PENDENTE"; // Sempre Pendente na criação
     const now = new Date().toISOString();
 
     const sql = `
       INSERT INTO Activity (id, title, description, priority, category, teamResponsible, personResponsible, status, createdAt, updatedAt)
-      VALUES (?, ?, ?, ?, ?, ?, ?, 'PENDENTE', ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
-    const args = [id, title, description, priority, category, teamResponsible, personResponsible, now, now];
+    const args = [id, title, description, priority, category, teamResponsible, personResponsible, status, now, now];
 
     if (isCloud) {
       await (db as any).execute({ sql, args });
@@ -79,10 +92,10 @@ export async function createActivity(formData: FormData) {
     }
 
     revalidatePath("/");
-    return { success: true, data: { id } };
-  } catch (error) {
-    console.error("Erro ao criar atividade:", error);
-    return { success: false, error: "Falha ao criar atividade" };
+    return { success: true };
+  } catch (error: any) {
+    console.error("Erro ao criar atividade:", error.message || error);
+    return { success: false, error: "Falha interna ao salvar a atividade." };
   }
 }
 

@@ -1,0 +1,40 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      target: dev
+    image: activity-control:dev
+    container_name: activity-control-dev
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - app-network
+    command: npm run dev
+    develop:
+      watch:
+        - action: sync
+          path: ./app
+          target: /app/app
+        - action: sync
+          path: ./components
+          target: /app/components
+        - action: sync
+          path: ./lib
+          target: /app/lib
+        - action: sync
+          path: ./public
+          target: /app/public
+        - action: rebuild
+          path: ./package.json
+
+networks:
+  app-network:
+    driver: bridge
