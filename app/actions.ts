@@ -151,6 +151,35 @@ export async function login(formData: FormData) {
   try {
     const { db, isCloud } = await getDbInstance();
     
+    // Garante que as tabelas existam no Turso/Nuvem também
+    if (isCloud) {
+      await db.execute(`
+        CREATE TABLE IF NOT EXISTS User (
+          id TEXT PRIMARY KEY,
+          firstName TEXT NOT NULL,
+          lastName TEXT NOT NULL,
+          pin TEXT NOT NULL,
+          createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(firstName, lastName)
+        )
+      `);
+      await db.execute(`
+        CREATE TABLE IF NOT EXISTS Activity (
+          id TEXT PRIMARY KEY,
+          title TEXT NOT NULL,
+          description TEXT NOT NULL,
+          priority TEXT NOT NULL,
+          category TEXT NOT NULL,
+          teamResponsible TEXT NOT NULL,
+          personResponsible TEXT NOT NULL,
+          status TEXT NOT NULL DEFAULT 'PENDENTE',
+          createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+    }
+
     let user;
     const findSql = "SELECT * FROM User WHERE firstName = ? AND lastName = ?";
     

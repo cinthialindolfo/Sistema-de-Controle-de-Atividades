@@ -42,9 +42,9 @@ export default function LoginPage() {
         
         <Card className="border-none shadow-2xl bg-white/80 backdrop-blur-md">
           <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-3xl font-bold tracking-tight text-slate-900">Bem-vindo</CardTitle>
+            <CardTitle className="text-3xl font-bold tracking-tight text-slate-900">Acesso ao Sistema</CardTitle>
             <CardDescription className="text-slate-500">
-              Entre com seu nome, sobrenome e o PIN de 4 dígitos. No primeiro acesso, seus dados serão salvos.
+              Gerencie suas atividades de forma simples e rápida. No primeiro acesso, seus dados serão salvos automaticamente.
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
@@ -114,7 +114,7 @@ export default function LoginPage() {
         </Card>
         
         <p className="mt-8 text-center text-slate-500 text-sm">
-          Acesso restrito para colaboradores autorizados.
+          Plataforma aberta para gestão de produtividade.
         </p>
       </div>
     </div>
