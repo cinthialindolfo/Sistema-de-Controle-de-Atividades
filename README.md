@@ -46,14 +46,16 @@ O login é simplificado para uso ágil:
 ## ✨ Funcionalidades Principais
 *   **Dashboard de Métricas**: Visualize o total de tarefas pendentes, em andamento e bloqueadas.
 *   **Filtros Inteligentes**: Busque atividades por nome, prioridade ou categoria.
-*   **Interface Responsiva**: Totalmente adaptado para Desktop e Mobile (incluindo tabela com scroll horizontal).
+*   **Paginação Server-Side**: Navegação fluida e rápida através de grandes volumes de dados.
+*   **Acesso Seguro**: Login com PIN e alternância de visibilidade (ícone de olho).
+*   **Interface Premium**: Totalmente adaptado para Desktop e Mobile, com suporte nativo a Temas (Claro/Escuro) com alto contraste.
 *   **Toasts de Notificação**: Feedback visual instantâneo para cada ação realizada.
 
 ## 🛠️ Tecnologias Utilizadas
 *   **Framework**: Next.js 15+ (App Router)
 *   **Linguagem**: TypeScript
 *   **Estilização**: Tailwind CSS + ShadCN UI
-*   **Banco de Dados**: SQLite via Better-SQLite3
+*   **Banco de Dados**: SQLite (Local) / Turso LibSQL (Nuvem)
 *   **Ícones**: Lucide React
 *   **Notificações**: Sonner (Toast)
 

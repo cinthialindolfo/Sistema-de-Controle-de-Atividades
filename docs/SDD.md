@@ -17,12 +17,13 @@ A aplicação utiliza o framework **Next.js** com a seguinte estrutura:
 ### 3.1 Requisitos Funcionais (RF)
 | ID | Requisito | Descrição |
 | :--- | :--- | :--- |
-| **RF01** | Login Simplificado | Acesso via Nome, Sobrenome e PIN de 4 dígitos. |
-| **RF02** | Auto-Registro | O primeiro acesso de um par Nome/Sobrenome cria o usuário automaticamente. |
-| **RF03** | CRUD de Atividades | Criação, Listagem, Edição e Exclusão persistidas diretamente no SQLite. |
-| **RF04** | Dashboard Reativo | Cards de resumo (Total, Pendentes, etc.) atualizados em tempo real via banco. |
-| **RF05** | Filtros Avançados | Filtragem por prioridade, categoria, time, responsável e busca textual. |
-| **RF06** | Feedback Visual | Notificações (Toasts) para todas as operações de sucesso ou erro. |
+| RF01 | Login Simplificado | Acesso via Nome, Sobrenome e PIN de 4 dígitos (com toggle de visibilidade). |
+| RF02 | Auto-Registro | O primeiro acesso de um par Nome/Sobrenome cria o usuário automaticamente. |
+| RF03 | CRUD de Atividades | Criação, Listagem, Edição e Exclusão persistidas diretamente no SQLite ou Turso. |
+| RF04 | Dashboard Reativo | Cards de resumo (Total, Pendentes, etc.) atualizados em tempo real via banco. |
+| RF05 | Filtros Avançados | Filtragem por prioridade, categoria, time, responsável e busca textual. |
+| RF06 | Feedback Visual | Notificações (Toasts) para todas as operações de sucesso ou erro. |
+| RF07 | Paginação | Listagem de atividades com suporte a paginação server-side para performance. |
 
 ### 3.2 Requisitos Não Funcionais (RNF)
 *   **RNF01 (Performance):** Operações de banco de dados devem ser executadas em menos de 100ms localmente.

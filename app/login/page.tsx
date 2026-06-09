@@ -7,13 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { login } from "@/app/actions";
-import { Lock, User, AlertCircle, Sparkles } from "lucide-react";
+import { Lock, User, AlertCircle, Sparkles, Eye, EyeOff } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showPin, setShowPin] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -33,7 +34,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4 relative overflow-hidden text-foreground">
       {/* Background Decorativo */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[120px]" />
@@ -73,27 +74,27 @@ export default function LoginPage() {
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName" className="text-foreground/80 font-bold text-xs uppercase tracking-wider ml-1">Nome</Label>
+                  <Label htmlFor="firstName" className="text-foreground font-bold text-xs uppercase tracking-wider ml-1">Nome</Label>
                   <div className="relative group">
                     <Input 
                       id="firstName" 
                       name="firstName" 
                       placeholder="João" 
                       required 
-                      className="pl-10 h-11 bg-background/50 border-border group-hover:border-primary/50 focus:border-primary focus:ring-primary/20 transition-all rounded-xl"
+                      className="pl-10 h-11 bg-background/50 border-border group-hover:border-primary/50 focus:border-primary focus:ring-primary/20 transition-all rounded-xl text-foreground placeholder:text-muted-foreground"
                     />
                     <User className="absolute left-3.5 top-3 w-4.5 h-4.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lastName" className="text-foreground/80 font-bold text-xs uppercase tracking-wider ml-1">Sobrenome</Label>
+                  <Label htmlFor="lastName" className="text-foreground font-bold text-xs uppercase tracking-wider ml-1">Sobrenome</Label>
                   <div className="relative group">
                     <Input 
                       id="lastName" 
                       name="lastName" 
                       placeholder="Silva" 
                       required 
-                      className="pl-10 h-11 bg-background/50 border-border group-hover:border-primary/50 focus:border-primary focus:ring-primary/20 transition-all rounded-xl"
+                      className="pl-10 h-11 bg-background/50 border-border group-hover:border-primary/50 focus:border-primary focus:ring-primary/20 transition-all rounded-xl text-foreground placeholder:text-muted-foreground"
                     />
                     <User className="absolute left-3.5 top-3 w-4.5 h-4.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                   </div>
@@ -101,18 +102,25 @@ export default function LoginPage() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="pin" className="text-foreground/80 font-bold text-xs uppercase tracking-wider ml-1">PIN de Acesso</Label>
+                <Label htmlFor="pin" className="text-foreground font-bold text-xs uppercase tracking-wider ml-1">PIN de Acesso</Label>
                 <div className="relative group">
                   <Input 
                     id="pin" 
                     name="pin" 
-                    type="password" 
+                    type={showPin ? "text" : "password"} 
                     placeholder="••••" 
                     maxLength={4} 
                     required 
-                    className="pl-10 h-11 bg-background/50 border-border group-hover:border-primary/50 focus:border-primary focus:ring-primary/20 tracking-[0.6em] font-mono text-lg transition-all rounded-xl"
+                    className="pl-10 pr-10 h-11 bg-background/50 border-border group-hover:border-primary/50 focus:border-primary focus:ring-primary/20 tracking-[0.6em] font-mono text-lg transition-all rounded-xl text-foreground placeholder:text-muted-foreground"
                   />
                   <Lock className="absolute left-3.5 top-3 w-4.5 h-4.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                  <button
+                    type="button"
+                    onClick={() => setShowPin(!showPin)}
+                    className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showPin ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
                 </div>
                 <p className="text-[10px] text-muted-foreground px-1 italic">Dica: Use 4 dígitos numéricos.</p>
               </div>
