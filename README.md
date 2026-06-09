@@ -21,7 +21,6 @@ A aplicação utiliza **SQLite** via **Prisma v6**. Prepare o banco de dados com
 ```bash
 npx prisma migrate dev
 ```
-
 ### 4. Executando em Desenvolvimento
 Para rodar o projeto com atualização em tempo real:
 ```bash
@@ -29,7 +28,16 @@ npm run dev
 ```
 Acesse [http://localhost:3000](http://localhost:3000) no seu navegador.
 
+### 🌐 Variáveis de Ambiente (Opcional - Nuvem)
+Se desejar rodar em produção (Vercel/Turso), configure:
+- `TURSO_DATABASE_URL`: URL do seu banco de dados LibSQL.
+- `TURSO_AUTH_TOKEN`: Token de autenticação do Turso.
+
+*Nota: Se estas variáveis não forem fornecidas, o sistema utilizará automaticamente o SQLite local.*
+
 ## 🔐 Acesso ao Sistema
+...
+
 O login é simplificado para uso ágil:
 1.  Na tela inicial, digite seu **Nome** e **Sobrenome**.
 2.  Crie um **PIN de 4 dígitos** (apenas números).
