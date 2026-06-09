@@ -149,39 +149,46 @@ export async function login(formData: FormData) {
 
   try {
     const db = await getDb();
-    
-    // Garante tabelas no Turso
+
+    // SQL de Inicialização (Idempotente)
+    const initUserSql = `
+      CREATE TABLE IF NOT EXISTS User (
+        id TEXT PRIMARY KEY,
+        firstName TEXT NOT NULL,
+        lastName TEXT NOT NULL,
+        pin TEXT NOT NULL,
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(firstName, lastName)
+      )
+    `;
+    const initActivitySql = `
+      CREATE TABLE IF NOT EXISTS Activity (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        priority TEXT NOT NULL,
+        category TEXT NOT NULL,
+        teamResponsible TEXT NOT NULL,
+        personResponsible TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'PENDENTE',
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+
+    // Garante tabelas antes de prosseguir
     if (isCloud) {
-      await (db as any).execute(`
-        CREATE TABLE IF NOT EXISTS User (
-          id TEXT PRIMARY KEY,
-          firstName TEXT NOT NULL,
-          lastName TEXT NOT NULL,
-          pin TEXT NOT NULL,
-          createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-          updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-          UNIQUE(firstName, lastName)
-        )
-      `);
-      await (db as any).execute(`
-        CREATE TABLE IF NOT EXISTS Activity (
-          id TEXT PRIMARY KEY,
-          title TEXT NOT NULL,
-          description TEXT NOT NULL,
-          priority TEXT NOT NULL,
-          category TEXT NOT NULL,
-          teamResponsible TEXT NOT NULL,
-          personResponsible TEXT NOT NULL,
-          status TEXT NOT NULL DEFAULT 'PENDENTE',
-          createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-          updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-      `);
+      await (db as any).execute(initUserSql);
+      await (db as any).execute(initActivitySql);
+    } else {
+      (db as any).exec(initUserSql);
+      (db as any).exec(initActivitySql);
     }
 
     let user;
     const findSql = "SELECT * FROM User WHERE firstName = ? AND lastName = ?";
-    
+
     if (isCloud) {
       const result = await (db as any).execute({ sql: findSql, args: [firstName, lastName] });
       user = result.rows[0];
@@ -194,7 +201,7 @@ export async function login(formData: FormData) {
       const now = new Date().toISOString();
       const insertSql = "INSERT INTO User (id, firstName, lastName, pin, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)";
       const insertArgs = [id, firstName, lastName, pin, now, now];
-      
+
       if (isCloud) {
         await (db as any).execute({ sql: insertSql, args: insertArgs });
       } else {
@@ -208,7 +215,7 @@ export async function login(formData: FormData) {
     const cookieStore = await cookies();
     cookieStore.set("auth_session", user.id, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: true, // Sempre secure em produção
       sameSite: "lax",
       maxAge: 60 * 60 * 24 * 7,
       path: "/",
@@ -216,15 +223,14 @@ export async function login(formData: FormData) {
 
     return { success: true };
   } catch (error: any) {
-  console.error("ERRO CRÍTICO NO LOGIN:", error.message || error);
-  return { 
-    success: false, 
-    error: isCloud 
-      ? `Erro na Nuvem: ${error.message || "Verifique as variáveis de ambiente."}`
-      : `Erro Local: ${error.message || "Falha no banco de dados."}`
-  };
+    console.error("ERRO NO LOGIN:", error.message || error);
+    return { 
+      success: false, 
+      error: `Erro no Servidor: ${error.message || "Falha desconhecida no banco de dados."}` 
+    };
   }
   }
+
 export async function logout() {
   const cookieStore = await cookies();
   cookieStore.delete("auth_session");
