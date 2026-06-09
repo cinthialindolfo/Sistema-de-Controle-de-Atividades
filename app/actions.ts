@@ -216,11 +216,15 @@ export async function login(formData: FormData) {
 
     return { success: true };
   } catch (error: any) {
-    console.error("ERRO NO LOGIN:", error);
-    return { success: false, error: "Erro ao processar login." };
+  console.error("ERRO CRÍTICO NO LOGIN:", error.message || error);
+  return { 
+    success: false, 
+    error: isCloud 
+      ? `Erro na Nuvem: ${error.message || "Verifique as variáveis de ambiente."}`
+      : `Erro Local: ${error.message || "Falha no banco de dados."}`
+  };
   }
-}
-
+  }
 export async function logout() {
   const cookieStore = await cookies();
   cookieStore.delete("auth_session");

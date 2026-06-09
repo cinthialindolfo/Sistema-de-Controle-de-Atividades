@@ -16,10 +16,10 @@ export async function getDb() {
   } else {
     // Modo Local: Better-SQLite3
     try {
-      // Usamos require para evitar que o bundler de front-end tente analisar isso
-      // O path.resolve ajuda a manter o caminho do banco consistente
-      const Database = require('better-sqlite3');
-      const dbPath = path.resolve(process.cwd(), 'dev.db');
+      // Importação dinâmica para evitar que o Vercel tente carregar a biblioteca nativa
+      const Database = (await import('better-sqlite3')).default;
+      const dbPath = path.join(process.cwd(), 'dev.db');
+      console.log('--- DB INIT --- Path:', dbPath);
       const db = new Database(dbPath);
       db.pragma('journal_mode = WAL');
 
