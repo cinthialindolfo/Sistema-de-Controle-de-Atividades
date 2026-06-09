@@ -34,9 +34,11 @@ export async function getDb() {
       const betterSqlite3 = await import('better-sqlite3');
       const Database = betterSqlite3.default || betterSqlite3;
       
-      // No Vercel, usamos /tmp para escrita. Localmente usamos a raiz.
-      const dbDir = isVercel ? '/tmp' : process.cwd();
-      const dbPath = path.join(dbDir, 'dev.db');
+      // No Vercel, usamos /tmp para escrita. Localmente usamos a raiz de forma absoluta.
+      const isVercel = process.env.VERCEL === '1' || process.env.NEXT_RUNTIME === 'nodejs' && process.env.NODE_ENV === 'production';
+      const dbPath = isVercel 
+        ? path.join('/tmp', 'dev.db')
+        : path.resolve(process.cwd(), 'dev.db');
       
       console.log(`--- DB INIT --- Modo: SQLITE | Ambiente: ${isVercel ? 'VERCEL' : 'LOCAL'} | Path: ${dbPath}`);
       
