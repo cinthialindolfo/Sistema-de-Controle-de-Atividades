@@ -31,6 +31,9 @@ export function FilterBar() {
   const updateFilters = (newFilters: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString());
     
+    // Sempre que um filtro mudar, resetamos a página para 1
+    params.set("page", "1");
+    
     Object.entries(newFilters).forEach(([key, value]) => {
       if (value && value !== "all") {
         params.set(key, value);

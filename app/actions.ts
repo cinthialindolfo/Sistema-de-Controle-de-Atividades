@@ -12,47 +12,77 @@ import { getDb, isCloud } from '../lib/db';
 export async function getActivities(filters?: any) {
   try {
     const db = await getDb();
-    let query = "SELECT * FROM Activity WHERE 1=1";
+    let baseQuery = "FROM Activity WHERE 1=1";
     const params: any[] = [];
 
     if (filters?.search) {
-      query += " AND title LIKE ?";
-      params.push(`%${filters.search}%`);
+      baseQuery += " AND (title LIKE ? OR description LIKE ?)";
+      params.push(`%${filters.search}%`, `%${filters.search}%`);
     }
     if (filters?.priority && filters.priority !== "all") {
-      query += " AND priority = ?";
+      baseQuery += " AND priority = ?";
       params.push(filters.priority);
     }
     if (filters?.status && filters.status !== "all") {
-      query += " AND status = ?";
+      baseQuery += " AND status = ?";
       params.push(filters.status);
     }
     if (filters?.category && filters.category !== "all") {
-      query += " AND category = ?";
+      baseQuery += " AND category = ?";
       params.push(filters.category);
     }
     if (filters?.teamResponsible) {
-      query += " AND teamResponsible LIKE ?";
+      baseQuery += " AND teamResponsible LIKE ?";
       params.push(`%${filters.teamResponsible}%`);
     }
     if (filters?.personResponsible) {
-      query += " AND personResponsible LIKE ?";
+      baseQuery += " AND personResponsible LIKE ?";
       params.push(`%${filters.personResponsible}%`);
     }
 
-    query += " ORDER BY createdAt DESC";
+    // Calcular o total de registros (para paginação)
+    const countQuery = `SELECT COUNT(*) as total ${baseQuery}`;
+    let totalRecords = 0;
     
-    // Suporte para Turso (execute) vs better-sqlite3 (all)
-    const activities = isCloud 
-      ? (await (db as any).execute({ sql: query, args: params })).rows
-      : (db as any).prepare(query).all(...params);
+    if (isCloud) {
+      const countResult = await (db as any).execute({ sql: countQuery, args: params });
+      totalRecords = countResult.rows[0].total as number;
+    } else {
+      const countResult = (db as any).prepare(countQuery).get(...params);
+      totalRecords = countResult.total as number;
+    }
 
-    return { success: true, data: activities };
+    // Lógica de Paginação (10 itens por página), exceto se for explicitly limit=1000
+    const limit = filters?.limit ? parseInt(filters.limit, 10) : 10;
+    const page = filters?.page ? parseInt(filters.page, 10) : 1;
+    const offset = (page - 1) * limit;
+    const totalPages = Math.ceil(totalRecords / limit);
+
+    // Adicionar ordenação e limites à query principal
+    let query = `SELECT * ${baseQuery} ORDER BY createdAt DESC LIMIT ? OFFSET ?`;
+    const paginatedParams = [...params, limit, offset];
+    
+    const activities = isCloud 
+      ? (await (db as any).execute({ sql: query, args: paginatedParams })).rows
+      : (db as any).prepare(query).all(...paginatedParams);
+
+    return { 
+      success: true, 
+      data: activities,
+      pagination: {
+        page,
+        limit,
+        totalRecords,
+        totalPages
+      }
+    };
   } catch (error) {
     console.error("Erro ao buscar atividades:", error);
     return { success: false, error: "Falha ao carregar atividades" };
   }
 }
+
+
 
 export async function createActivityAction(formData: FormData) {
   try {
@@ -274,57 +304,35 @@ export async function getCurrentUser() {
 export async function seedActivities() {
   try {
     const db = await getDb();
-    const activities = [
-      {
-        id: "seed-1",
-        title: "Correção de Bug no Login",
-        description: "Usuários estão relatando erro ao digitar PIN correto.",
-        priority: "CRITICA",
-        category: "BUG",
-        teamResponsible: "Segurança",
-        personResponsible: "Ana Silva",
-        status: "PENDENTE"
-      },
-      {
-        id: "seed-2",
-        title: "Implementar Dark Mode",
-        description: "Adicionar suporte a tema escuro em toda a aplicação.",
-        priority: "MEDIA",
-        category: "FEATURE",
-        teamResponsible: "Frontend",
-        personResponsible: "Bruno Costa",
-        status: "EM_ANDAMENTO"
-      },
-      {
-        id: "seed-3",
-        title: "Otimização de Query",
-        description: "Melhorar performance da listagem principal.",
-        priority: "ALTA",
-        category: "MELHORIA",
-        teamResponsible: "Backend",
-        personResponsible: "Carla Souza",
-        status: "CONCLUIDA"
-      },
-      {
-        id: "seed-4",
-        title: "Atualizar Dependências",
-        description: "npm update e fix de vulnerabilidades.",
-        priority: "BAIXA",
-        category: "OPERACIONAL",
-        teamResponsible: "DevOps",
-        personResponsible: "Daniel Lima",
-        status: "BLOQUEADA"
-      }
-    ];
+    
+    // Gerar 35 atividades dinamicamente para testar paginação
+    const titles = ["Revisão de Código", "Atualização de Servidor", "Design de Nova Tela", "Correção de Bug", "Análise de Métricas", "Reunião de Alinhamento", "Otimização de Banco de Dados"];
+    const priorities = ["BAIXA", "MEDIA", "ALTA", "CRITICA"];
+    const categories = ["BUG", "FEATURE", "MELHORIA", "SUPORTE", "OPERACIONAL"];
+    const statuses = ["PENDENTE", "EM_ANDAMENTO", "CONCLUIDA", "BLOQUEADA"];
+    const teams = ["Frontend", "Backend", "DevOps", "Design", "QA", "Produto"];
+    const people = ["Ana Silva", "Bruno Costa", "Carla Souza", "Daniel Lima", "Eduardo Santos", "Fernanda Oliveira"];
 
-    const now = new Date().toISOString();
+    const now = new Date();
 
-    for (const activity of activities) {
+    for (let i = 1; i <= 35; i++) {
+      const id = `seed-bulk-${i}`;
+      const title = `${titles[i % titles.length]} #${i}`;
+      const description = `Descrição detalhada gerada automaticamente para a demanda de número ${i} para testar a paginação e a renderização do sistema.`;
+      const priority = priorities[i % priorities.length];
+      const category = categories[i % categories.length];
+      const status = statuses[i % statuses.length];
+      const team = teams[i % teams.length];
+      const person = people[i % people.length];
+      
+      // Datas variadas para testar a ordenação
+      const createdAt = new Date(now.getTime() - (i * 24 * 60 * 60 * 1000)).toISOString(); 
+
       const sql = `
         INSERT OR REPLACE INTO Activity (id, title, description, priority, category, teamResponsible, personResponsible, status, createdAt, updatedAt)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
-      const args = [activity.id, activity.title, activity.description, activity.priority, activity.category, activity.teamResponsible, activity.personResponsible, activity.status, now, now];
+      const args = [id, title, description, priority, category, team, person, status, createdAt, createdAt];
       
       if (isCloud) {
         await (db as any).execute({ sql, args });
@@ -340,3 +348,4 @@ export async function seedActivities() {
     return { success: false, error: "Falha ao gerar dados." };
   }
 }
+

@@ -10,7 +10,14 @@ const hasTurso = process.env.TURSO_DATABASE_URL !== undefined && process.env.TUR
 // Priorizamos Turso na Nuvem, mas permitimos SQLite em /tmp se Turso não estiver configurado
 const isCloud = hasTurso;
 
+// Singleton global para manter a conexão aberta em desenvolvimento e produção
+let cachedDb: any = null;
+
 export async function getDb() {
+  if (cachedDb) {
+    return cachedDb;
+  }
+
   if (isCloud) {
     // Modo Nuvem: Turso (LibSQL)
     console.log('--- DB INIT --- Modo: TURSO (Nuvem)');
@@ -19,10 +26,11 @@ export async function getDb() {
       // Garantir que a URL comece com libsql:// ou https://
       const formattedUrl = url.includes('://') ? url : `libsql://${url}`;
       
-      return createClient({
+      cachedDb = createClient({
         url: formattedUrl,
         authToken: process.env.TURSO_AUTH_TOKEN,
       });
+      return cachedDb;
     } catch (e: any) {
       console.error('Erro ao configurar cliente Turso:', e.message);
       throw e;
@@ -35,12 +43,12 @@ export async function getDb() {
       const Database = betterSqlite3.default || betterSqlite3;
       
       // No Vercel, usamos /tmp para escrita. Localmente usamos a raiz de forma absoluta.
-      const isVercel = process.env.VERCEL === '1' || process.env.NEXT_RUNTIME === 'nodejs' && process.env.NODE_ENV === 'production';
-      const dbPath = isVercel 
+      const isVercelRuntime = process.env.VERCEL === '1' || (process.env.NEXT_RUNTIME === 'nodejs' && process.env.NODE_ENV === 'production');
+      const dbPath = isVercelRuntime 
         ? path.join('/tmp', 'dev.db')
         : path.resolve(process.cwd(), 'dev.db');
       
-      console.log(`--- DB INIT --- Modo: SQLITE | Ambiente: ${isVercel ? 'VERCEL' : 'LOCAL'} | Path: ${dbPath}`);
+      console.log(`--- DB INIT --- Modo: SQLITE | Ambiente: ${isVercelRuntime ? 'VERCEL' : 'LOCAL'} | Path: ${dbPath}`);
       
       const db = new Database(dbPath);
       db.pragma('journal_mode = WAL');
@@ -70,7 +78,8 @@ export async function getDb() {
         );
       `);
       
-      return db;
+      cachedDb = db;
+      return cachedDb;
     } catch (e: any) {
       console.error('Erro ao carregar banco SQLite:', e.message);
       throw e;

@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/table";
 import { SeedButton } from "@/components/seed-button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { PaginationControls } from "@/components/pagination-controls";
 
 // Helper para cores das Badges de Prioridade (Otimizadas para Legibilidade Máxima)
 const getPriorityBadge = (priority: string) => {
@@ -54,13 +55,15 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     status: params.status as string,
     teamResponsible: params.team as string,
     personResponsible: params.person as string,
+    page: params.page as string,
   };
 
   const response = await getActivities(filters);
   const activities = (response.success ? response.data : []) as any[];
+  const paginationInfo = response.success && response.pagination ? response.pagination : { page: 1, totalPages: 1 };
 
   // Busca todas as atividades (sem filtros) para as métricas do dashboard
-  const allActivitiesResponse = await getActivities();
+  const allActivitiesResponse = await getActivities({ limit: 1000 }); // Buscar todas ignorando paginação localmente
   const allActivities = (allActivitiesResponse.success ? allActivitiesResponse.data : []) as any[];
 
   return (
@@ -212,54 +215,67 @@ export default async function DashboardPage({ searchParams }: PageProps) {
               )}
             </TableBody>
           </Table>
+          
+          <PaginationControls 
+            currentPage={paginationInfo.page} 
+            totalPages={paginationInfo.totalPages} 
+          />
         </div>
 
         {/* Visualização em Cards (Refinada para Mobile) */}
         <div className="grid grid-cols-1 gap-4 md:hidden pb-10">
           {activities.length > 0 ? (
-            activities.map((activity) => (
-              <div key={activity.id} className="bg-card rounded-2xl border border-border shadow-sm p-4 active:scale-[0.98] transition-transform space-y-4">
-                <div className="flex justify-between items-start">
-                  <div className="space-y-1">
+            <>
+              {activities.map((activity) => (
+                <div key={activity.id} className="bg-card rounded-2xl border border-border shadow-sm p-4 active:scale-[0.98] transition-transform space-y-4">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        {getStatusBadge(activity.status)}
+                        <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">{activity.category}</span>
+                      </div>
+                      <h3 className="text-base font-black text-foreground leading-tight pt-1">
+                        {activity.title}
+                      </h3>
+                    </div>
+                    <ActivityActions activity={activity} />
+                  </div>
+                  
+                  <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed bg-muted/30 p-2.5 rounded-xl border border-border/50 font-medium">
+                    {activity.description}
+                  </p>
+
+                  <div className="flex items-center justify-between pt-2">
                     <div className="flex items-center gap-2">
-                       {getStatusBadge(activity.status)}
-                       <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">{activity.category}</span>
+                      <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center text-[10px] font-black text-primary">
+                        {activity.personResponsible.substring(0, 2).toUpperCase()}
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs font-black text-foreground">{activity.personResponsible}</span>
+                        <span className="text-[9px] text-muted-foreground font-black uppercase tracking-tighter">{activity.teamResponsible}</span>
+                      </div>
                     </div>
-                    <h3 className="text-base font-black text-foreground leading-tight pt-1">
-                      {activity.title}
-                    </h3>
+                    <div className="flex flex-col items-end">
+                      <span className="text-[9px] text-muted-foreground font-black uppercase tracking-widest mb-1 opacity-60">Urgência</span>
+                      {getPriorityBadge(activity.priority)}
+                    </div>
                   </div>
-                  <ActivityActions activity={activity} />
-                </div>
-                
-                <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed bg-muted/30 p-2.5 rounded-xl border border-border/50 font-medium">
-                  {activity.description}
-                </p>
 
-                <div className="flex items-center justify-between pt-2">
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center text-[10px] font-black text-primary">
-                      {activity.personResponsible.substring(0, 2).toUpperCase()}
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-xs font-black text-foreground">{activity.personResponsible}</span>
-                      <span className="text-[9px] text-muted-foreground font-black uppercase tracking-tighter">{activity.teamResponsible}</span>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="text-[9px] text-muted-foreground font-black uppercase tracking-widest mb-1 opacity-60">Urgência</span>
-                    {getPriorityBadge(activity.priority)}
+                  <div className="pt-3 border-t border-border/50 flex justify-between items-center text-[10px] text-muted-foreground font-bold uppercase tracking-tighter font-mono">
+                    <span>Início: {new Date(activity.createdAt).toLocaleDateString('pt-BR')}</span>
+                    {activity.updatedAt !== activity.createdAt && (
+                      <span className="text-primary/70 italic">Modificado</span>
+                    )}
                   </div>
                 </div>
-
-                <div className="pt-3 border-t border-border/50 flex justify-between items-center text-[10px] text-muted-foreground font-bold uppercase tracking-tighter font-mono">
-                  <span>Início: {new Date(activity.createdAt).toLocaleDateString('pt-BR')}</span>
-                  {activity.updatedAt !== activity.createdAt && (
-                    <span className="text-primary/70 italic">Modificado</span>
-                  )}
-                </div>
+              ))}
+              <div className="bg-card rounded-2xl border border-border shadow-sm mt-2">
+                <PaginationControls 
+                  currentPage={paginationInfo.page} 
+                  totalPages={paginationInfo.totalPages} 
+                />
               </div>
-            ))
+            </>
           ) : (
             <div className="bg-card rounded-2xl border-2 border-dashed border-border p-16 text-center text-muted-foreground text-sm font-bold uppercase tracking-widest">
               Lista vazia
