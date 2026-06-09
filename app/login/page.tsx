@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { login } from "@/app/actions";
-import { Lock, User, AlertCircle } from "lucide-react";
+import { Lock, User, AlertCircle, Sparkles } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -32,62 +33,76 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100 via-slate-50 to-slate-100 p-4">
-      <div className="w-full max-w-md animate-in fade-in zoom-in duration-500">
-        <div className="flex justify-center mb-8">
-          <div className="bg-blue-600 p-3 rounded-2xl shadow-xl shadow-blue-200">
-            <Lock className="w-8 h-8 text-white" />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4 relative overflow-hidden">
+      {/* Background Decorativo */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-primary/10 blur-[120px]" />
+      </div>
+
+      <div className="absolute top-6 right-6 z-20">
+        <ThemeToggle />
+      </div>
+
+      <div className="w-full max-w-md animate-in fade-in zoom-in duration-500 relative z-10">
+        <div className="flex flex-col items-center mb-8 space-y-4">
+          <div className="bg-primary p-3.5 rounded-2xl shadow-2xl shadow-primary/20 ring-4 ring-background">
+            <Sparkles className="w-8 h-8 text-primary-foreground" />
+          </div>
+          <div className="text-center space-y-1">
+            <h1 className="text-2xl font-black tracking-tight text-foreground">ActivityControl</h1>
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Enterprise Edition</p>
           </div>
         </div>
         
-        <Card className="border-none shadow-2xl bg-white/80 backdrop-blur-md">
-          <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-3xl font-bold tracking-tight text-slate-900">Acesso ao Sistema</CardTitle>
-            <CardDescription className="text-slate-500">
-              Gerencie suas atividades de forma simples e rápida. No primeiro acesso, seus dados serão salvos automaticamente.
+        <Card className="border-border/50 shadow-2xl bg-card/50 backdrop-blur-xl">
+          <CardHeader className="space-y-1 text-center pb-2">
+            <CardTitle className="text-2xl font-bold tracking-tight text-foreground">Boas-vindas</CardTitle>
+            <CardDescription className="text-muted-foreground text-sm font-medium">
+              Entre com seus dados para gerenciar suas demandas.
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-5 pt-4">
               {error && (
-                <div className="bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-lg flex items-center gap-3 text-sm animate-in slide-in-from-top-2 duration-300">
-                  <AlertCircle className="w-4 h-4" />
-                  <p>{error}</p>
+                <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-xl flex items-center gap-3 text-sm animate-in slide-in-from-top-2 duration-300">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <p className="font-semibold">{error}</p>
                 </div>
               )}
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName" className="text-slate-700 font-medium">Nome</Label>
-                  <div className="relative">
+                  <Label htmlFor="firstName" className="text-foreground/80 font-bold text-xs uppercase tracking-wider ml-1">Nome</Label>
+                  <div className="relative group">
                     <Input 
                       id="firstName" 
                       name="firstName" 
-                      placeholder="Ex: João" 
+                      placeholder="João" 
                       required 
-                      className="pl-10 h-12 bg-white/50 border-slate-200 focus:border-blue-500 focus:ring-blue-500 transition-all"
+                      className="pl-10 h-11 bg-background/50 border-border group-hover:border-primary/50 focus:border-primary focus:ring-primary/20 transition-all rounded-xl"
                     />
-                    <User className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+                    <User className="absolute left-3.5 top-3 w-4.5 h-4.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lastName" className="text-slate-700 font-medium">Sobrenome</Label>
-                  <div className="relative">
+                  <Label htmlFor="lastName" className="text-foreground/80 font-bold text-xs uppercase tracking-wider ml-1">Sobrenome</Label>
+                  <div className="relative group">
                     <Input 
                       id="lastName" 
                       name="lastName" 
-                      placeholder="Ex: Silva" 
+                      placeholder="Silva" 
                       required 
-                      className="pl-10 h-12 bg-white/50 border-slate-200 focus:border-blue-500 focus:ring-blue-500 transition-all"
+                      className="pl-10 h-11 bg-background/50 border-border group-hover:border-primary/50 focus:border-primary focus:ring-primary/20 transition-all rounded-xl"
                     />
-                    <User className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+                    <User className="absolute left-3.5 top-3 w-4.5 h-4.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                   </div>
                 </div>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="pin" className="text-slate-700 font-medium">PIN de 4 dígitos</Label>
-                <div className="relative">
+                <Label htmlFor="pin" className="text-foreground/80 font-bold text-xs uppercase tracking-wider ml-1">PIN de Acesso</Label>
+                <div className="relative group">
                   <Input 
                     id="pin" 
                     name="pin" 
@@ -95,27 +110,31 @@ export default function LoginPage() {
                     placeholder="••••" 
                     maxLength={4} 
                     required 
-                    className="pl-10 h-12 bg-white/50 border-slate-200 focus:border-blue-500 focus:ring-blue-500 tracking-[0.5em] font-mono text-lg transition-all"
+                    className="pl-10 h-11 bg-background/50 border-border group-hover:border-primary/50 focus:border-primary focus:ring-primary/20 tracking-[0.6em] font-mono text-lg transition-all rounded-xl"
                   />
-                  <Lock className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
+                  <Lock className="absolute left-3.5 top-3 w-4.5 h-4.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 </div>
+                <p className="text-[10px] text-muted-foreground px-1 italic">Dica: Use 4 dígitos numéricos.</p>
               </div>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="pt-2">
               <Button 
                 type="submit" 
-                className="w-full h-12 text-lg font-semibold bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all" 
+                className="w-full h-11 text-sm font-black uppercase tracking-widest bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl shadow-primary/20 transition-all rounded-xl active:scale-[0.98]" 
                 disabled={loading}
               >
-                {loading ? "Entrando..." : "Acessar Sistema"}
+                {loading ? "Autenticando..." : "Entrar no Sistema"}
               </Button>
             </CardFooter>
           </form>
         </Card>
         
-        <p className="mt-8 text-center text-slate-500 text-sm">
-          Plataforma aberta para gestão de produtividade.
-        </p>
+        <div className="mt-8 flex flex-col items-center space-y-2">
+          <p className="text-muted-foreground text-[11px] font-bold uppercase tracking-tighter">
+            Plataforma de Alta Performance
+          </p>
+          <div className="h-1 w-12 bg-border rounded-full" />
+        </div>
       </div>
     </div>
   );
