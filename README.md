@@ -46,5 +46,17 @@ O login é simplificado para uso ágil:
 *   **Ícones**: Lucide React
 *   **Notificações**: Sonner (Toast)
 
+## 🤖 Uso de IA / Cloud Code Skill
+
+Este projeto foi desenvolvido com o auxílio do **Gemini CLI**, uma ferramenta de IA baseada em Agentic Workflows que atua como um engenheiro de software sênior.
+
+*   **Objetivo:** Acelerar o ciclo de desenvolvimento, garantir a consistência com a especificação (SDD) e automatizar tarefas repetitivas de análise de código.
+*   **Impacto:** Redução significativa no tempo de mapeamento da arquitetura e identificação de gaps entre a especificação técnica e a implementação real.
+*   **Partes Assistidas por IA:**
+    *   **Análise de Gaps:** Identificação de requisitos faltantes no SDD e na UI.
+    *   **Refinamento de Documentação:** Geração automática das seções de Critérios de Aceite, Casos de Erro e Estratégia de Validação no `docs/SDD.md`.
+    *   **Geração de Componentes:** Ajustes na lógica de visualização de datas e status na interface.
+    *   **Criação de Scripts:** Desenvolvimento do script de seed de dados para testes rápidos.
+
 ---
 Desenvolvido para ser simples, rápido e eficiente.

@@ -14,6 +14,7 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
+import { SeedButton } from "@/components/seed-button";
 
 // Helper para cores das Badges de Prioridade
 const getPriorityBadge = (priority: string) => {
@@ -86,6 +87,8 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           </div>
 
           <div className="flex items-center gap-2">
+            <SeedButton />
+            
             <form action={logout}>
               <Button variant="outline" size="icon" className="h-9 w-9 md:h-11 md:w-11 rounded-lg md:rounded-xl text-zinc-500 hover:text-red-600 hover:bg-red-50 border-zinc-200 hover:border-red-100 transition-all">
                 <LogOut className="h-4 w-4 md:h-5 md:w-5" />
@@ -132,6 +135,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                 <TableHead className="py-4 font-bold text-zinc-900 text-center">Urgência</TableHead>
                 <TableHead className="py-4 font-bold text-zinc-900">Responsável</TableHead>
                 <TableHead className="py-4 font-bold text-zinc-900 text-center">Status</TableHead>
+                <TableHead className="py-4 font-bold text-zinc-900 text-center">Datas</TableHead>
                 <TableHead className="py-4 font-bold text-zinc-900 text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -171,6 +175,22 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                     <TableCell className="text-center">
                       {getStatusBadge(activity.status)}
                     </TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex flex-col items-center">
+                        <span className="text-[10px] text-zinc-400 font-bold uppercase">Criado em</span>
+                        <span className="text-[11px] text-zinc-600">
+                          {new Date(activity.createdAt).toLocaleDateString('pt-BR')}
+                        </span>
+                        {activity.updatedAt !== activity.createdAt && (
+                          <>
+                            <span className="text-[10px] text-zinc-400 font-bold uppercase mt-1">Atualizado</span>
+                            <span className="text-[11px] text-zinc-600">
+                              {new Date(activity.updatedAt).toLocaleDateString('pt-BR')}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell className="text-right">
                       <ActivityActions activity={activity} />
                     </TableCell>
@@ -178,7 +198,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-40 text-center text-zinc-400 italic">
+                  <TableCell colSpan={7} className="h-40 text-center text-zinc-400 italic">
                     Nenhuma demanda registrada no momento.
                   </TableCell>
                 </TableRow>
@@ -223,6 +243,13 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                     <span className="text-[9px] text-zinc-400 font-bold uppercase">Urgência</span>
                     {getPriorityBadge(activity.priority)}
                   </div>
+                </div>
+
+                <div className="pt-2 border-t border-zinc-50 flex justify-between items-center text-[10px] text-zinc-400 font-medium">
+                  <span>Criado em: {new Date(activity.createdAt).toLocaleDateString('pt-BR')}</span>
+                  {activity.updatedAt !== activity.createdAt && (
+                    <span>Atualizado: {new Date(activity.updatedAt).toLocaleDateString('pt-BR')}</span>
+                  )}
                 </div>
               </div>
             ))

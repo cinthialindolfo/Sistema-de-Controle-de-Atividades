@@ -247,3 +247,73 @@ export async function getCurrentUser() {
     return null;
   }
 }
+
+export async function seedActivities() {
+  try {
+    const db = await getDb();
+    const activities = [
+      {
+        id: "seed-1",
+        title: "Correção de Bug no Login",
+        description: "Usuários estão relatando erro ao digitar PIN correto.",
+        priority: "CRITICA",
+        category: "BUG",
+        teamResponsible: "Segurança",
+        personResponsible: "Ana Silva",
+        status: "PENDENTE"
+      },
+      {
+        id: "seed-2",
+        title: "Implementar Dark Mode",
+        description: "Adicionar suporte a tema escuro em toda a aplicação.",
+        priority: "MEDIA",
+        category: "FEATURE",
+        teamResponsible: "Frontend",
+        personResponsible: "Bruno Costa",
+        status: "EM_ANDAMENTO"
+      },
+      {
+        id: "seed-3",
+        title: "Otimização de Query",
+        description: "Melhorar performance da listagem principal.",
+        priority: "ALTA",
+        category: "MELHORIA",
+        teamResponsible: "Backend",
+        personResponsible: "Carla Souza",
+        status: "CONCLUIDA"
+      },
+      {
+        id: "seed-4",
+        title: "Atualizar Dependências",
+        description: "npm update e fix de vulnerabilidades.",
+        priority: "BAIXA",
+        category: "OPERACIONAL",
+        teamResponsible: "DevOps",
+        personResponsible: "Daniel Lima",
+        status: "BLOQUEADA"
+      }
+    ];
+
+    const now = new Date().toISOString();
+
+    for (const activity of activities) {
+      const sql = `
+        INSERT OR REPLACE INTO Activity (id, title, description, priority, category, teamResponsible, personResponsible, status, createdAt, updatedAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+      const args = [activity.id, activity.title, activity.description, activity.priority, activity.category, activity.teamResponsible, activity.personResponsible, activity.status, now, now];
+      
+      if (isCloud) {
+        await (db as any).execute({ sql, args });
+      } else {
+        (db as any).prepare(sql).run(...args);
+      }
+    }
+
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("Erro no seed:", error);
+    return { success: false, error: "Falha ao gerar dados." };
+  }
+}

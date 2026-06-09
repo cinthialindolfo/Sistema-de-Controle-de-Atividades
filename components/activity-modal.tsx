@@ -60,7 +60,7 @@ export function ActivityModal({
       } else {
         toast.error(result.error || "Ocorreu um erro inesperado", { id: toastId })
       }
-    } catch (error) {
+    } catch {
       toast.error("Erro de conexão com o servidor", { id: toastId })
     }
   }
@@ -196,6 +196,23 @@ export function ActivityModal({
                     </SelectContent>
                   </Select>
                 )}
+              </div>
+            )}
+
+            {isDetails && (
+              <div className="grid grid-cols-2 gap-4 pt-2">
+                <div className="space-y-1">
+                  <span className="text-[10px] font-bold text-zinc-400 uppercase">Criado em</span>
+                  <p className="text-xs text-zinc-600">
+                    {new Date(activityToEdit?.createdAt).toLocaleString('pt-BR')}
+                  </p>
+                </div>
+                <div className="space-y-1 text-right">
+                  <span className="text-[10px] font-bold text-zinc-400 uppercase">Última atualização</span>
+                  <p className="text-xs text-zinc-600">
+                    {new Date(activityToEdit?.updatedAt).toLocaleString('pt-BR')}
+                  </p>
+                </div>
               </div>
             )}
           </div>
