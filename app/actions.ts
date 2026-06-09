@@ -3,16 +3,15 @@
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { getDb, isCloud } from '../lib/db';
 
-// Função auxiliar para pegar o DB e saber se é nuvem ou local
-async function getDbInstance() {
-  const { default: db, isCloud } = await import('../lib/db');
-  return { db, isCloud };
-}
+/**
+ * Nota: getDb() agora é assíncrona para suportar o isolamento do better-sqlite3 no build.
+ */
 
 export async function getActivities(filters?: any) {
   try {
-    const { db, isCloud } = await getDbInstance();
+    const db = await getDb();
     let query = "SELECT * FROM Activity WHERE 1=1";
     const params: any[] = [];
 
@@ -45,8 +44,8 @@ export async function getActivities(filters?: any) {
     
     // Suporte para Turso (execute) vs better-sqlite3 (all)
     const activities = isCloud 
-      ? (await db.execute({ sql: query, args: params })).rows
-      : db.prepare(query).all(...params);
+      ? (await (db as any).execute({ sql: query, args: params })).rows
+      : (db as any).prepare(query).all(...params);
 
     return { success: true, data: activities };
   } catch (error) {
@@ -57,7 +56,7 @@ export async function getActivities(filters?: any) {
 
 export async function createActivity(formData: FormData) {
   try {
-    const { db, isCloud } = await getDbInstance();
+    const db = await getDb();
     const id = Math.random().toString(36).substring(2, 11);
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
@@ -74,9 +73,9 @@ export async function createActivity(formData: FormData) {
     const args = [id, title, description, priority, category, teamResponsible, personResponsible, now, now];
 
     if (isCloud) {
-      await db.execute({ sql, args });
+      await (db as any).execute({ sql, args });
     } else {
-      db.prepare(sql).run(...args);
+      (db as any).prepare(sql).run(...args);
     }
 
     revalidatePath("/");
@@ -89,7 +88,7 @@ export async function createActivity(formData: FormData) {
 
 export async function updateActivity(id: string, formData: FormData) {
   try {
-    const { db, isCloud } = await getDbInstance();
+    const db = await getDb();
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
     const priority = formData.get("priority") as string;
@@ -107,9 +106,9 @@ export async function updateActivity(id: string, formData: FormData) {
     const args = [title, description, priority, category, teamResponsible, personResponsible, status, now, id];
 
     if (isCloud) {
-      await db.execute({ sql, args });
+      await (db as any).execute({ sql, args });
     } else {
-      db.prepare(sql).run(...args);
+      (db as any).prepare(sql).run(...args);
     }
 
     revalidatePath("/");
@@ -122,13 +121,13 @@ export async function updateActivity(id: string, formData: FormData) {
 
 export async function deleteActivity(id: string) {
   try {
-    const { db, isCloud } = await getDbInstance();
+    const db = await getDb();
     const sql = "DELETE FROM Activity WHERE id = ?";
     
     if (isCloud) {
-      await db.execute({ sql, args: [id] });
+      await (db as any).execute({ sql, args: [id] });
     } else {
-      db.prepare(sql).run(id);
+      (db as any).prepare(sql).run(id);
     }
 
     revalidatePath("/");
@@ -149,11 +148,11 @@ export async function login(formData: FormData) {
   }
 
   try {
-    const { db, isCloud } = await getDbInstance();
+    const db = await getDb();
     
-    // Garante que as tabelas existam no Turso/Nuvem também
+    // Garante tabelas no Turso
     if (isCloud) {
-      await db.execute(`
+      await (db as any).execute(`
         CREATE TABLE IF NOT EXISTS User (
           id TEXT PRIMARY KEY,
           firstName TEXT NOT NULL,
@@ -164,7 +163,7 @@ export async function login(formData: FormData) {
           UNIQUE(firstName, lastName)
         )
       `);
-      await db.execute(`
+      await (db as any).execute(`
         CREATE TABLE IF NOT EXISTS Activity (
           id TEXT PRIMARY KEY,
           title TEXT NOT NULL,
@@ -184,10 +183,10 @@ export async function login(formData: FormData) {
     const findSql = "SELECT * FROM User WHERE firstName = ? AND lastName = ?";
     
     if (isCloud) {
-      const result = await db.execute({ sql: findSql, args: [firstName, lastName] });
+      const result = await (db as any).execute({ sql: findSql, args: [firstName, lastName] });
       user = result.rows[0];
     } else {
-      user = db.prepare(findSql).get(firstName, lastName);
+      user = (db as any).prepare(findSql).get(firstName, lastName);
     }
 
     if (!user) {
@@ -197,9 +196,9 @@ export async function login(formData: FormData) {
       const insertArgs = [id, firstName, lastName, pin, now, now];
       
       if (isCloud) {
-        await db.execute({ sql: insertSql, args: insertArgs });
+        await (db as any).execute({ sql: insertSql, args: insertArgs });
       } else {
-        db.prepare(insertSql).run(...insertArgs);
+        (db as any).prepare(insertSql).run(...insertArgs);
       }
       user = { id, firstName, lastName, pin };
     } else if (user.pin !== pin) {
@@ -235,14 +234,14 @@ export async function getCurrentUser() {
 
     if (!userId) return null;
 
-    const { db, isCloud } = await getDbInstance();
+    const db = await getDb();
     const sql = "SELECT * FROM User WHERE id = ?";
     
     if (isCloud) {
-      const result = await db.execute({ sql, args: [userId] });
+      const result = await (db as any).execute({ sql, args: [userId] });
       return result.rows[0];
     } else {
-      return db.prepare(sql).get(userId);
+      return (db as any).prepare(sql).get(userId);
     }
   } catch (error) {
     return null;
