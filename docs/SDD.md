@@ -73,7 +73,14 @@ A aplicação utiliza o framework **Next.js** com a seguinte estrutura:
 
 ## 8. Estratégia de Validação
 
-### 8.1 Testes Automatizados (Vitest)
+### 8.1 Integração Contínua (CI)
+Toda alteração na branch `main` dispara um workflow no GitHub Actions que automatiza:
+1.  Instalação limpa de dependências (`npm ci`).
+2.  Geração do cliente Prisma.
+3.  Execução da suíte completa de testes Vitest.
+4.  Garantia de integridade do build da aplicação.
+
+### 8.2 Testes Automatizados (Vitest)
 A aplicação conta com uma cobertura de testes dividida em:
 *   **Unitários (Actions):** Validação de toda a lógica de negócio (CRUD, Login, Seed).
 *   **UI/Componentes:** Garantia de que badges e cards renderizam as informações e cores corretas.
