@@ -60,6 +60,15 @@ Os testes cobrem:
 *   **Sistema**: Seed de dados e inicialização.
 *   **UI**: Renderização de componentes e lógica de badges.
 
+## 🐳 Docker
+
+Para rodar a aplicação em um container:
+
+```bash
+docker build -t controle-atividades .
+docker run -p 3000:3000 controle-atividades
+```
+
 ## 🤖 Uso de IA / Cloud Code Skill
 
 Este projeto foi desenvolvido com o auxílio do **Gemini CLI**, uma ferramenta de IA baseada em Agentic Workflows que atua como um engenheiro de software sênior.

@@ -1,0 +1,11 @@
+node_modules
+.next
+.git
+.vscode
+dev.db-journal
+dev.db-shm
+dev.db-wal
+npm-debug.log
+README.md
+docs
+__tests__
