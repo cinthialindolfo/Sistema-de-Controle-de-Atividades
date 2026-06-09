@@ -72,9 +72,19 @@ A aplicação utiliza o framework **Next.js** com a seguinte estrutura:
 *   **Validação de Formulário:** Campos obrigatórios vazios impedem o envio do formulário no cliente.
 
 ## 8. Estratégia de Validação
-*   **Testes Manuais:** Execução dos fluxos principais conforme seção 5.
-*   **Validação de Schema:** Verificação se o arquivo `dev.db` segue o modelo definido na seção 4.
-*   **Responsividade:** Teste via DevTools em resoluções de 375px (iPhone SE) e 1440px (Desktop).
+
+### 8.1 Testes Automatizados (Vitest)
+A aplicação conta com uma cobertura de testes dividida em:
+*   **Unitários (Actions):** Validação de toda a lógica de negócio (CRUD, Login, Seed).
+*   **UI/Componentes:** Garantia de que badges e cards renderizam as informações e cores corretas.
+*   **Mocks:** Utilização de mocks para isolar o sistema de banco de dados e rotas do Next.js.
+
+### 8.2 Testes Manuais
+*   Execução dos fluxos principais conforme seção 5.
+*   Verificação de persistência no arquivo `dev.db`.
+
+### 8.3 Responsividade
+*   Teste via DevTools em resoluções de 375px (iPhone SE) e 1440px (Desktop).
 
 ## 9. Decisões de Projeto (ADRs)
 1.  **Migração Prisma -> Better-SQLite3:** Tomada para resolver conflitos de engine type no Windows e simplificar a distribuição local.

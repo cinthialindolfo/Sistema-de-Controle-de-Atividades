@@ -46,6 +46,20 @@ O login é simplificado para uso ágil:
 *   **Ícones**: Lucide React
 *   **Notificações**: Sonner (Toast)
 
+## 🧪 Testes Automatizados
+
+O projeto conta com uma suíte de testes unitários para garantir a integridade das regras de negócio.
+
+### Como rodar os testes:
+```bash
+npm test
+```
+Os testes cobrem:
+*   **Ações de Autenticação**: Login, Logout e validação de sessão.
+*   **CRUD Completo**: Criação, atualização e exclusão de atividades.
+*   **Sistema**: Seed de dados e inicialização.
+*   **UI**: Renderização de componentes e lógica de badges.
+
 ## 🤖 Uso de IA / Cloud Code Skill
 
 Este projeto foi desenvolvido com o auxílio do **Gemini CLI**, uma ferramenta de IA baseada em Agentic Workflows que atua como um engenheiro de software sênior.
